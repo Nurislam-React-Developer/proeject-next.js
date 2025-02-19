@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function SignUp() {
   const [username, setUsername] = useState('');
@@ -29,9 +31,21 @@ export default function SignUp() {
 
     try {
       register(username, email, password);
+      toast.success('Регистрация успешна!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
       router.push('/profile');
     } catch (err) {
       setError('Ошибка при регистрации');
+      toast.error('Ошибка при регистрации', {
+        position: 'top-right',
+        autoClose: 3000
+      });
     }
   };
 

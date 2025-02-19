@@ -3,10 +3,14 @@
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import CreatePostModal from './CreatePostModal';
+import { FaPlus } from 'react-icons/fa';
 
 export default function Header() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -29,6 +33,13 @@ export default function Header() {
             </Link>
             {user ? (
               <>
+                <button
+                  onClick={() => setIsCreatePostModalOpen(true)}
+                  className="flex items-center space-x-2 bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  <FaPlus size={14} />
+                  <span>Создать пост</span>
+                </button>
                 <Link href="/profile" className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-md text-sm font-medium">
                   Профиль
                 </Link>
@@ -38,6 +49,10 @@ export default function Header() {
                 >
                   Выйти
                 </button>
+                <CreatePostModal
+                  isOpen={isCreatePostModalOpen}
+                  onClose={() => setIsCreatePostModalOpen(false)}
+                />
               </>
             ) : (
               <>

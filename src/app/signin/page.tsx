@@ -3,18 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  
   const router = useRouter();
   const { login, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/profile');
+      router.push('/');
     }
   }, [isAuthenticated, router]);
 
@@ -33,8 +34,21 @@ export default function SignIn() {
 
     try {
       login(email, password);
+      toast.success('Успешный вход!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      router.push('/');
     } catch (err) {
       setError('Ошибка при входе');
+      toast.error('Ошибка при входе', {
+        position: 'top-right',
+        autoClose: 3000
+      });
     }
   };
 
