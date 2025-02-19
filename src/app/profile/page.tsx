@@ -5,23 +5,55 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 
+interface EditedUser {
+  username: string;
+  email: string;
+  bio: string;
+  socialLinks: {
+    twitter: string;
+    github: string;
+    linkedin: string;
+  };
+  theme: 'light' | 'dark';
+  avatarColor: string;
+}
+
 export default function Profile() {
   const router = useRouter();
   const { user, logout, isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState({
+  const [editedUser, setEditedUser] = useState<EditedUser>({
     username: '',
-    email: ''
+    email: '',
+    bio: '',
+    socialLinks: {
+      twitter: '',
+      github: '',
+      linkedin: ''
+    },
+    theme: 'light',
+    avatarColor: '#' + Math.floor(Math.random()*16777215).toString(16)
   });
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/signin');
     } else if (user) {
-      setEditedUser({
-        username: user.username,
-        email: user.email
-      });
+      const savedUserData = localStorage.getItem('userData');
+      if (savedUserData) {
+        const parsedData = JSON.parse(savedUserData);
+        setEditedUser({
+          ...parsedData,
+          username: user.username,
+          email: user.email
+        });
+      } else {
+        setEditedUser({
+          ...editedUser,
+          username: user.username,
+          email: user.email
+        });
+      }
     }
   }, [isAuthenticated, router, user]);
 
@@ -39,16 +71,21 @@ export default function Profile() {
   };
 
   const handleSave = () => {
-    // Here you would typically make an API call to update the user data
-    // For now, we'll just close the edit mode
+    localStorage.setItem('userData', JSON.stringify(editedUser));
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditedUser({
-      username: user.username,
-      email: user.email
-    });
+    const savedUserData = localStorage.getItem('userData');
+    if (savedUserData) {
+      setEditedUser(JSON.parse(savedUserData));
+    } else {
+      setEditedUser({
+        ...editedUser,
+        username: user.username,
+        email: user.email
+      });
+    }
     setIsEditing(false);
   };
 
@@ -81,20 +118,29 @@ export default function Profile() {
             <div className="space-y-8">
               <div className="flex items-center space-x-6">
                 <div className="relative group">
-                  <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                    <span className="text-4xl font-bold text-gray-600">
-                      {user.username[0].toUpperCase()}
+                  <div 
+                    className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden"
+                    style={{ backgroundColor: editedUser.avatarColor }}
+                  >
+                    <span className="text-4xl font-bold text-white">
+                      {editedUser.username && editedUser.username[0] ? editedUser.username[0].toUpperCase() : ''}
                     </span>
                   </div>
                   {isEditing && (
-                    <button className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors">
+                    <button 
+                      onClick={() => setEditedUser({
+                        ...editedUser,
+                        avatarColor: '#' + Math.floor(Math.random()*16777215).toString(16)
+                      })}
+                      className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </button>
                   )}
                 </div>
-                <div>
+                <div className="flex-1">
                   {isEditing ? (
                     <div className="space-y-4">
                       <div>
@@ -115,6 +161,65 @@ export default function Profile() {
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">О себе</label>
+                        <textarea
+                          value={editedUser.bio}
+                          onChange={(e) => setEditedUser({ ...editedUser, bio: e.target.value })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">Социальные сети</label>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Twitter"
+                            value={editedUser.socialLinks.twitter}
+                            onChange={(e) => setEditedUser({
+                              ...editedUser,
+                              socialLinks: { ...editedUser.socialLinks, twitter: e.target.value }
+                            })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="GitHub"
+                            value={editedUser.socialLinks.github}
+                            onChange={(e) => setEditedUser({
+                              ...editedUser,
+                              socialLinks: { ...editedUser.socialLinks, github: e.target.value }
+                            })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="LinkedIn"
+                            value={editedUser.socialLinks.linkedin}
+                            onChange={(e) => setEditedUser({
+                              ...editedUser,
+                              socialLinks: { ...editedUser.socialLinks, linkedin: e.target.value }
+                            })}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Тема</label>
+                        <select
+                          value={editedUser.theme}
+                          onChange={(e) => setEditedUser({ ...editedUser, theme: e.target.value as 'light' | 'dark' })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                          <option value="light">Светлая</option>
+                          <option value="dark">Темная</option>
+                        </select>
+                      </div>
                       <div className="flex space-x-4">
                         <button
                           onClick={handleSave}
@@ -132,8 +237,11 @@ export default function Profile() {
                     </div>
                   ) : (
                     <div>
-                      <h2 className="text-2xl font-semibold text-gray-800">{user.username}</h2>
-                      <p className="text-gray-600">{user.email}</p>
+                      <h2 className="text-2xl font-semibold text-gray-800">{editedUser.username}</h2>
+                      <p className="text-gray-600">{editedUser.email}</p>
+                      {editedUser.bio && (
+                        <p className="mt-2 text-gray-600">{editedUser.bio}</p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -147,13 +255,25 @@ export default function Profile() {
                       <p className="text-sm font-medium text-gray-500">ID пользователя</p>
                       <p className="mt-1 text-gray-900">{user.id}</p>
                     </div>
+                    {editedUser.bio && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm font-medium text-gray-500">О себе</p>
+                        <p className="mt-1 text-gray-900">{editedUser.bio}</p>
+                      </div>
+                    )}
+                    {Object.entries(editedUser.socialLinks).map(([platform, link]) => (
+                      link && (
+                        <div key={platform} className="bg-gray-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-500">{platform.charAt(0).toUpperCase() + platform.slice(1)}</p>
+                          <a href={link} target="_blank" rel="noopener noreferrer" className="mt-1 text-blue-500 hover:text-blue-600">
+                            {link}
+                          </a>
+                        </div>
+                      )
+                    ))}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm font-medium text-gray-500">Имя пользователя</p>
-                      <p className="mt-1 text-gray-900">{user.username}</p>
-                    </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-sm font-medium text-gray-500">Email</p>
-                      <p className="mt-1 text-gray-900">{user.email}</p>
+                      <p className="text-sm font-medium text-gray-500">Тема</p>
+                      <p className="mt-1 text-gray-900">{editedUser.theme === 'light' ? 'Светлая' : 'Темная'}</p>
                     </div>
                   </div>
                 </div>

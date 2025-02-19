@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,8 +12,13 @@ export default function SignIn() {
   const router = useRouter();
   const { login, isAuthenticated } = useAuth();
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/profile');
+    }
+  }, [isAuthenticated, router]);
+
   if (isAuthenticated) {
-    router.push('/profile');
     return null;
   }
 
@@ -28,7 +33,6 @@ export default function SignIn() {
 
     try {
       login(email, password);
-      router.push('/profile');
     } catch (err) {
       setError('Ошибка при входе');
     }
