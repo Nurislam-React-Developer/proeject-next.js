@@ -1,101 +1,152 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+
+interface Post {
+  id: number;
+  content: string;
+  author: string;
+  imageUrl?: string;
+  likes: number;
+  createdAt: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: 1,
+      content: 'Привет всем! Это мой первый пост в нашей социальной сети! 👋',
+      author: 'Алекс',
+      imageUrl: '/next.svg',
+      likes: 5,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      content: 'Отличный день для новых открытий! 🌟',
+      author: 'Мария',
+      likes: 3,
+      createdAt: new Date().toISOString()
+    }
+  ]);
+  const [newPostContent, setNewPostContent] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleCreatePost = () => {
+    if (!newPostContent.trim()) return;
+
+    const newPost: Post = {
+      id: posts.length + 1,
+      content: newPostContent,
+      author: 'Пользователь',
+      likes: 0,
+      createdAt: new Date().toISOString()
+    };
+
+    setPosts([newPost, ...posts]);
+    setNewPostContent('');
+  };
+
+  const handleLike = (postId: number) => {
+    setPosts(posts.map(post =>
+      post.id === postId
+        ? { ...post, likes: post.likes + 1 }
+        : post
+    ));
+  };
+
+  return (
+    <main className="min-h-screen bg-gray-100">
+      <div className="max-w-2xl mx-auto p-4">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Социальная сеть</h1>
+        
+        {/* Create Post Section */}
+        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <textarea
+            value={newPostContent}
+            onChange={(e) => setNewPostContent(e.target.value)}
+            placeholder="Что у вас нового?"
+            className="w-full p-2 border rounded-lg mb-2 min-h-[100px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleCreatePost}
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Опубликовать
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Posts Feed */}
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <article key={post.id} className="bg-white rounded-lg shadow-md p-4">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 font-semibold">{post.author[0]}</span>
+                </div>
+                <div className="ml-3">
+                  <h3 className="font-semibold text-gray-800">{post.author}</h3>
+                  <p className="text-sm text-gray-500">
+                    {new Date(post.createdAt).toLocaleDateString('ru-RU')}
+                  </p>
+                </div>
+              </div>
+              
+              <p className="text-gray-800 mb-4">{post.content}</p>
+              
+              {post.imageUrl && (
+                <div className="mb-4">
+                  <Image
+                    src={post.imageUrl}
+                    alt="Post image"
+                    width={500}
+                    height={300}
+                    className="rounded-lg object-cover w-full"
+                  />
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between text-gray-500">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className="flex items-center space-x-2 hover:text-blue-500 transition"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  <span>{post.likes}</span>
+                </button>
+                
+                <button className="hover:text-blue-500 transition">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }
